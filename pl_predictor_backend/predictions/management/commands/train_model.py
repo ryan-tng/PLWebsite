@@ -26,15 +26,25 @@ class Command(BaseCommand):
         result = ml_service.train_model(matches)
         
         if result and isinstance(result, dict):
-            self.stdout.write(self.style.SUCCESS(f'✅ Model trained successfully!'))
-            self.stdout.write(f'   Model accuracy: {result.get("accuracy", 0):.2%}')
-            self.stdout.write(f'   Precision: {result.get("precision", 0):.2%}')
-            self.stdout.write(f'   Recall: {result.get("recall", 0):.2%}')
-            self.stdout.write(f'   F1 Score: {result.get("f1_score", 0):.2%}')
-            self.stdout.write(f'   Test set size: {result.get("test_matches_count", 0)} matches')
+            self.stdout.write(self.style.SUCCESS('Model trained successfully!'))
+            self.stdout.write('')
+            self.stdout.write('=== REAL MODEL METRICS (for resume) ===')
+            self.stdout.write(f'   Model Accuracy:     {result.get("accuracy", 0):.1%}')
+            self.stdout.write(f'   Baseline Accuracy:  {result.get("baseline_accuracy", 0):.1%} (random guessing)')
+            self.stdout.write(f'   Improvement:        +{result.get("improvement_over_baseline", 0):.1%} over baseline')
+            self.stdout.write('')
+            self.stdout.write('=== DETAILED METRICS ===')
+            self.stdout.write(f'   Precision: {result.get("precision", 0):.1%}')
+            self.stdout.write(f'   Recall:    {result.get("recall", 0):.1%}')
+            self.stdout.write(f'   F1 Score:  {result.get("f1_score", 0):.1%}')
+            self.stdout.write('')
+            self.stdout.write('=== DATASET INFO ===')
+            self.stdout.write(f'   Training samples: {result.get("training_samples", 0)} matches')
+            self.stdout.write(f'   Test samples:     {result.get("test_samples", 0)} matches')
+            self.stdout.write('')
         elif result:
-            self.stdout.write(self.style.SUCCESS(f'✅ Model trained successfully!'))
+            self.stdout.write(self.style.SUCCESS('Model trained successfully!'))
             self.stdout.write('   (Performance metrics not available)')
         else:
-            self.stdout.write(self.style.ERROR('❌ Model training failed. Check logs for details.'))
+            self.stdout.write(self.style.ERROR('Model training failed. Check logs for details.'))
 

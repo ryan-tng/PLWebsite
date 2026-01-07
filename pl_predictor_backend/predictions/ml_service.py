@@ -152,24 +152,36 @@ class PLPredictionService:
             # Store feature names for prediction
             self.feature_names = available_predictors
             
-            # Evaluate model
+            # Evaluate model with REAL metrics
             y_pred = self.model.predict(X_test)
-            # Enhanced performance metrics for production display
-            accuracy = 0.892
-            precision = 0.897
-            recall = 0.889
-            f1 = 0.893
             
-            logger.info(f"Model trained successfully. Accuracy: {accuracy:.3f}, Precision: {precision:.3f}")
+            # Calculate actual performance metrics
+            accuracy = accuracy_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+            recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+            f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+            
+            # Calculate baseline (random guessing would be ~33% for 3 classes or ~50% for binary)
+            baseline_accuracy = 1.0 / len(np.unique(y_test)) if len(np.unique(y_test)) > 0 else 0.5
+            improvement_over_baseline = accuracy - baseline_accuracy
+            
+            logger.info(f"Model trained successfully!")
+            logger.info(f"  Accuracy: {accuracy:.3f} (Baseline: {baseline_accuracy:.3f}, Improvement: +{improvement_over_baseline:.3f})")
+            logger.info(f"  Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
+            logger.info(f"  Training samples: {len(X_train)}, Test samples: {len(X_test)}")
             
             # Save the trained model
             self.save_model()
             
             return {
-                'accuracy': accuracy,
-                'precision': precision,
-                'recall': recall,
-                'f1_score': f1,
+                'accuracy': float(accuracy),
+                'precision': float(precision),
+                'recall': float(recall),
+                'f1_score': float(f1),
+                'baseline_accuracy': float(baseline_accuracy),
+                'improvement_over_baseline': float(improvement_over_baseline),
+                'training_samples': len(X_train),
+                'test_samples': len(X_test),
                 'test_matches_count': len(test)
             }
             
