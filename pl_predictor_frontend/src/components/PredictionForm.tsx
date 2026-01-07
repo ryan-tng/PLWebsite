@@ -79,27 +79,27 @@ export default function PredictionForm({ onPredictionMade }: PredictionFormProps
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Predict Match Result</h2>
+    <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl shadow-xl border border-white/20">
+      <h2 className="text-2xl font-bold text-white mb-6">Predict Match Result</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-purple-200 mb-2">
               Team
             </label>
             <select
               value={selectedTeam || ''}
               onChange={(e) => setSelectedTeam(Number(e.target.value))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
               disabled={teamsLoading}
             >
-              <option value="">
+              <option value="" className="bg-slate-800">
                 {teamsLoading ? 'Loading teams...' : 'Select a team'}
               </option>
               {teams && Array.isArray(teams) && teams.map(team => (
-                <option key={team.id} value={team.id}>
+                <option key={team.id} value={team.id} className="bg-slate-800">
                   {team.name}
                 </option>
               ))}
@@ -107,21 +107,21 @@ export default function PredictionForm({ onPredictionMade }: PredictionFormProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-purple-200 mb-2">
               Opponent
             </label>
             <select
               value={selectedOpponent || ''}
               onChange={(e) => setSelectedOpponent(Number(e.target.value))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
               disabled={teamsLoading}
             >
-              <option value="">
+              <option value="" className="bg-slate-800">
                 {teamsLoading ? 'Loading teams...' : 'Select opponent'}
               </option>
               {teams && Array.isArray(teams) && teams.map(team => (
-                <option key={team.id} value={team.id}>
+                <option key={team.id} value={team.id} className="bg-slate-800">
                   {team.name}
                 </option>
               ))}
@@ -131,36 +131,36 @@ export default function PredictionForm({ onPredictionMade }: PredictionFormProps
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-purple-200 mb-2">
               Match Date
             </label>
             <input
               type="date"
               value={matchDate}
               onChange={(e) => setMatchDate(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-purple-200 mb-2">
               Venue
             </label>
             <select
               value={venue}
               onChange={(e) => setVenue(e.target.value as 'H' | 'A')}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
             >
-              <option value="H">Home</option>
-              <option value="A">Away</option>
+              <option value="H" className="bg-slate-800">Home</option>
+              <option value="A" className="bg-slate-800">Away</option>
             </select>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
@@ -168,9 +168,9 @@ export default function PredictionForm({ onPredictionMade }: PredictionFormProps
         <Button
           type="submit"
           disabled={isLoading || teamsLoading || teams.length === 0}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50 transition-all shadow-lg"
         >
-          {isLoading ? 'Making Prediction...' : teamsLoading ? 'Loading Teams...' : 'Predict Match'}
+          {isLoading ? 'Making Prediction...' : teamsLoading ? 'Loading Teams...' : '⚽ Predict Match'}
         </Button>
       </form>
     </div>
