@@ -107,6 +107,7 @@ docker-compose.override.yml
 
 # Machine Learning
 *.pkl
+!pl_predictor_backend/predictions/trained_model.pkl
 *.joblib
 *.h5
 *.model

@@ -6,6 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from django.utils import timezone
 from datetime import datetime, time
 import logging
+import joblib
+import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +34,10 @@ class PLPredictionService:
         # Keep derived features but make them simpler
         self.derived_predictors = ["goal_diff_rolling"]
         self.is_trained = False
+        self.model_path = Path(__file__).parent / 'trained_model.pkl'
+        
+        # Try to load pre-trained model on initialization
+        self.load_model()
     
     def prepare_match_data(self, matches_queryset):
         """Convert Django QuerySet to pandas DataFrame for ML processing"""
@@ -155,6 +162,9 @@ class PLPredictionService:
             
             logger.info(f"Model trained successfully. Accuracy: {accuracy:.3f}, Precision: {precision:.3f}")
             
+            # Save the trained model
+            self.save_model()
+            
             return {
                 'accuracy': accuracy,
                 'precision': precision,
@@ -165,6 +175,39 @@ class PLPredictionService:
             
         except Exception as e:
             logger.error(f"Error training model: {str(e)}")
+            return False
+    
+    def save_model(self):
+        """Save the trained model to disk"""
+        try:
+            model_data = {
+                'model': self.model,
+                'feature_names': self.feature_names if hasattr(self, 'feature_names') else None,
+                'is_trained': self.is_trained
+            }
+            joblib.dump(model_data, self.model_path)
+            logger.info(f"Model saved to {self.model_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving model: {str(e)}")
+            return False
+    
+    def load_model(self):
+        """Load a pre-trained model from disk"""
+        try:
+            if os.path.exists(self.model_path):
+                model_data = joblib.load(self.model_path)
+                self.model = model_data['model']
+                if model_data.get('feature_names'):
+                    self.feature_names = model_data['feature_names']
+                self.is_trained = model_data.get('is_trained', True)
+                logger.info("Pre-trained model loaded successfully")
+                return True
+            else:
+                logger.info("No pre-trained model found")
+                return False
+        except Exception as e:
+            logger.error(f"Error loading model: {str(e)}")
             return False
     
     def predict_match(self, team, opponent, date, venue):
