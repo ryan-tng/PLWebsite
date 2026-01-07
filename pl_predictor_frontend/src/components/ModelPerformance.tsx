@@ -1,62 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ModelPerformance as ModelPerformanceType, modelApi, PaginatedResponse } from '@/lib/api';
-import { formatDate } from '@/lib/utils';
+import { useState } from 'react';
+import { modelApi } from '@/lib/api';
 
 export default function ModelPerformance() {
-  const [performance, setPerformance] = useState<ModelPerformanceType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPerformance = async () => {
-      try {
-        const response = await modelApi.getPerformance();
-        // Handle paginated response from Django REST Framework
-        const performanceData = response.data.results || response.data;
-        setPerformance(Array.isArray(performanceData) ? performanceData : []);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to load model performance');
-        setPerformance([]); // Ensure performance is always an array
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPerformance();
-  }, []);
 
   const handleTrainModel = async () => {
     setLoading(true);
+    setError(null);
     try {
       await modelApi.train();
-      // Refresh performance data
-      const response = await modelApi.getPerformance();
-      const performanceData = response.data.results || response.data;
-      setPerformance(Array.isArray(performanceData) ? performanceData : []);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to train model');
-      setPerformance([]); // Ensure performance is always an array
     } finally {
       setLoading(false);
     }
   };
-
-  if (loading && performance.length === 0) {
-    return (
-      <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl shadow-xl border border-white/20">
-        <div className="animate-pulse">
-          <div className="h-8 bg-white/20 rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            <div className="h-4 bg-white/20 rounded"></div>
-            <div className="h-4 bg-white/20 rounded"></div>
-            <div className="h-4 bg-white/20 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl shadow-xl border border-white/20">
@@ -96,76 +57,8 @@ export default function ModelPerformance() {
       </div>
 
       {error && (
-        <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-4">
+        <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg">
           {error}
-        </div>
-      )}
-
-      {!performance || !Array.isArray(performance) || performance.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-300 mb-4">No training history available.</p>
-          <p className="text-sm text-gray-400">Train the model to see detailed metrics.</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white mb-2">Training History</h3>
-          {performance.map((perf) => (
-            <div key={perf.id} className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-md font-semibold text-white">
-                  {perf.model_version}
-                </h4>
-                <span className="text-sm text-gray-400">
-                  {formatDate(perf.training_date)}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-400">Accuracy</p>
-                  <p className="text-xl font-bold text-blue-400">
-                    {(perf.accuracy * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Precision</p>
-                  <p className="text-xl font-bold text-green-400">
-                    {(perf.precision * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Recall</p>
-                  <p className="text-xl font-bold text-yellow-400">
-                    {(perf.recall * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">F1 Score</p>
-                  <p className="text-xl font-bold text-purple-400">
-                    {(perf.f1_score * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-400">Test Set Size:</span>{' '}
-                    <span className="font-semibold text-white">{perf.test_set_size}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Features:</span>{' '}
-                    <span className="font-semibold text-white">{perf.feature_count}</span>
-                  </div>
-                </div>
-                {perf.notes && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-400">{perf.notes}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
         </div>
       )}
     </div>
